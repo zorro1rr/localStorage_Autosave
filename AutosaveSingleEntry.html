@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Form Autosave</title>
+
+	<style type="text/css">
+		body {
+			margin: 1em auto;
+			max-width: 40em;
+			width: 88%;
+		}
+		label,
+		input,
+		textarea {
+			display: block;
+			width: 100%;
+		}
+		input,
+		textarea {
+			margin-bottom: 1em;
+		}
+		textarea {
+			height: 8em;
+		}
+	</style>
+</head>
+<body>
+
+	<h1>Form Autosave</h1>
+
+	<form class="save-me" id="save-me">
+
+		<label for="name">Name</label>
+		<input type="text" name="name" id="name">
+
+		<label for="address">Address</label>
+		<input type="text" name="address" id="address">
+
+		<label for="email">Email</label>
+		<input type="email" name="email" id="email">
+
+		<label for="more">Additional thoughts?</label>
+		<textarea name="more" id="more"></textarea>
+
+		<p>
+			<button type="submit">Submit</button>
+		</p>
+
+	</form>
+
+	<script>
+		//
+		// Variables
+		//
+		var storagePrefix = 'form-autosave_';
+
+    //helper funciton to check if the field has an ID, and reutrn the name as a fallback if one doesn't exist
+    var getID = function (field) {
+    	if (field.id.length > 0) {
+    		return field.id;
+    	}
+    	if (field.name.length > 0) {
+    		return field.name;
+    	}
+    	return null;
+    };
+    //make funciton to load the storage data back into the field if the page reloads
+    var loadData = function () {
+    // Get all of the form fields
+    var fields = document.querySelectorAll('#save-me input, #save-me textarea');
+    // Loop through each field and load any saved data in localStorage
+    Array.prototype.slice.call(fields).forEach(function (field) {
+      // If the field has no usable ID, skip it
+      var id = getID(field);
+      if (!id) return;
+      // If there's no saved value in localStorage, skip it
+      var saved = localStorage.getItem(storagePrefix + id);
+      if (!saved) return;
+      // Set the field value to the saved data in localStorage
+      field.value = saved;
+    });
+  };
+
+
+    //function to handle input events
+    var inputHandler = function (event) {
+      //check to see if the parent element has the save-me ID, if not end the function with return
+      if (!event.target.closest('#save-me')) return;
+      //use getID helper function to check the field for an ID, if it doesn't have one end the function
+      var id = getID(event.target);
+      if (!id) return;
+      //save the field to localStorage
+      localStorage.setItem(storagePrefix + id, event.target.value);
+    };
+
+    var submitHandler = function (event) {
+      if (event.target.id !== 'save-me') return;
+
+      //use clearData helper function to whipe the data
+      clearData();
+    }
+
+    var clearData = function () {
+  // Get all of the form fields
+  var fields = document.querySelectorAll('#save-me input, #save-me textarea');
+  // Loop through each field and load any saved data in localStorage
+  Array.prototype.slice.call(fields).forEach(function (field) {
+    // If the field has no usable ID, skip it
+    var id = getID(field);
+    if (!id) return;
+    // Remove the item from localStorage
+    localStorage.removeItem(storagePrefix + id);
+  });
+};
+
+
+    //run loadData to repopulate the fields if page reloads
+    loadData();
+    //make eventlistners for inputs and submits
+    document.addEventListener('input', inputHandler, false);
+    document.addEventListener('submit', submitHandler, false);
+	</script>
+</body>
+</html>
